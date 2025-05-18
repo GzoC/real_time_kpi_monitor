@@ -1,5 +1,3 @@
-Por supuesto. Aquí tienes un **README.md** listo para copiar y pegar, siguiendo buenas prácticas de portafolio, con estructura clara, explicación para principiantes y orientado a destacar tus competencias y facilitar la comprensión a empleadores técnicos y no técnicos.
-
 ---
 
 ````markdown
