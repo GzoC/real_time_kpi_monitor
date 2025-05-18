@@ -1,6 +1,3 @@
----
-
-````markdown
 # Sistema Automatizado de Monitoreo de Calidad y KPIs de Producción Industrial en Tiempo Real
 
 ---
