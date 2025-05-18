@@ -135,6 +135,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.venv_real_time_kpi_monitor
 
 # Spyder project settings
 .spyderproject
