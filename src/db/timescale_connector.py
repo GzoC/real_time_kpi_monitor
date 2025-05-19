@@ -15,7 +15,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
-from config import SQLALCHEMY_DATABASE_URL
+from src.config import SQLALCHEMY_DATABASE_URL
 
 # 1. Crear el engine de SQLAlchemy usando la URL de conexión
 engine: Engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)
