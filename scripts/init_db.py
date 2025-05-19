@@ -6,6 +6,8 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.db.timescale_connector import init_db
+from src.config import SQLALCHEMY_DATABASE_URL
 
 if __name__ == "__main__":
+    print("Cadena de conexión:", SQLALCHEMY_DATABASE_URL)
     init_db()
