@@ -173,3 +173,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Ignorar datos y logs de servicios dockerizados
+docker/timescaledb/data/
+docker/mosquitto/data/
+docker/mosquitto/log/
+
