@@ -17,9 +17,9 @@ DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "changeme")
 DB_NAME = os.getenv("DB_NAME", "kpi_monitor")
 
-# Cadena de conexión completa para SQLAlchemy + psycopg2
+# Cadena de conexión completa para SQLAlchemy + pg8000
 SQLALCHEMY_DATABASE_URL = (
-    f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}"
+    f"postgresql+pg8000://{DB_USER}:{DB_PASSWORD}"
     f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
     

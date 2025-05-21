@@ -1,7 +1,8 @@
 pandas
 numpy
 SQLAlchemy
-psycopg2-binary
+pg8000
 paho-mqtt
+python-dotenv
 fastapi
 uvicorn
