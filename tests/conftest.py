@@ -1,46 +1,30 @@
-"""
-conftest.py
-Configuración común para las pruebas con pytest.
-"""
-
+"""Test configuration for pytest."""
 import pytest
-import os
-import logging
-from pathlib import Path
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
-@pytest.fixture(autouse=True)
-def setup_test_logging():
-    """Configura logging para las pruebas."""
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+from src.db.database import Base
+from src.db.models import SensorReading, KPIValue, Alert
+
+@pytest.fixture(scope="function")
+def test_db():
+    """Create a test database."""
+    # Use in-memory SQLite for testing
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
     )
-
-@pytest.fixture
-def test_data_dir():
-    """Directorio para datos de prueba."""
-    return Path(__file__).parent / 'test_data'
-
-@pytest.fixture(autouse=True)
-def setup_test_env(monkeypatch):
-    """Configura variables de entorno para pruebas."""
-    test_env = {
-        'DB_HOST': 'localhost',
-        'DB_PORT': '5432',
-        'DB_NAME': 'test_db',
-        'DB_USER': 'test_user',
-        'DB_PASSWORD': 'test_password',
-    }
-    for key, value in test_env.items():
-        monkeypatch.setenv(key, value)
-
-def pytest_configure(config):
-    """Configura marcadores de pytest."""
-    config.addinivalue_line("markers", "db: marca pruebas relacionadas con la base de datos")
-    config.addinivalue_line("markers", "mqtt: marca pruebas relacionadas con MQTT")
-    config.addinivalue_line("markers", "integration: marca pruebas de integración")
-
-@pytest.fixture(scope='session')
-def docker_compose_file(pytestconfig):
-    """Archivo docker-compose para pruebas."""
-    return os.path.join(str(pytestconfig.rootdir), 'docker', 'docker-compose.test.yml')
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    
+    # Create tables
+    Base.metadata.create_all(bind=engine)
+    
+    # Create test session
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+        Base.metadata.drop_all(bind=engine)

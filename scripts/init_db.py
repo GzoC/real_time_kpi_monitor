@@ -1,30 +1,41 @@
-# scripts/init_db.py
-import sys
+"""Initialize the TimescaleDB database with required extensions and tables."""
+from sqlalchemy import create_engine, text
+from dotenv import load_dotenv
 import os
-from pathlib import Path
 
-# Obtener la ruta absoluta al directorio raíz del proyecto
-project_root = Path(__file__).parent.parent.absolute()
-sys.path.insert(0, str(project_root))
+# Load environment variables
+load_dotenv()
 
-print("Python path:", sys.path)
-print("Directorio actual:", os.getcwd())
-print("Raíz del proyecto:", project_root)
+# Database connection parameters
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
 
-try:
-    from src.db.timescale_connector import init_db, test_connection
-    from src.config import DB_HOST, DB_PORT, DB_USER, DB_NAME
+# Create database URL
+DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+def init_db():
+    """Initialize the database with TimescaleDB extension."""
+    engine = create_engine(DATABASE_URL)
     
-    print("\nConfiguración de base de datos:")
-    print(f"Host: {DB_HOST}")
-    print(f"Puerto: {DB_PORT}")
-    print(f"Usuario: {DB_USER}")
-    print(f"Base de datos: {DB_NAME}")
-    
-    print("\nProbando conexión...")
-    if test_connection():
-        print("\nInicializando base de datos...")
-        init_db()
-except Exception as e:
-    print("❌ Error:", str(e))
-    print("Tipo de error:", type(e).__name__)
+    with engine.connect() as conn:
+        # Create TimescaleDB extension
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;"))
+        
+        # Create hypertables for time-series data
+        conn.execute(text("""
+            SELECT create_hypertable('sensor_readings', 'timestamp', 
+                                   if_not_exists => TRUE);
+        """))
+        
+        conn.execute(text("""
+            SELECT create_hypertable('kpi_values', 'timestamp',
+                                   if_not_exists => TRUE);
+        """))
+        
+        conn.commit()
+
+if __name__ == "__main__":
+    init_db()

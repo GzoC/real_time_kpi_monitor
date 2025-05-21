@@ -135,7 +135,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-.venv_real_time_kpi_monitor
+.venv_iotanomalydetection
 
 # Spyder project settings
 .spyderproject
@@ -174,8 +174,4 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# Ignorar datos y logs de servicios dockerizados
-docker/timescaledb/data/
-docker/mosquitto/data/
-docker/mosquitto/log/
-
+.venv_real_time_kpi_monitor
