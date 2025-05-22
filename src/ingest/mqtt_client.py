@@ -12,7 +12,8 @@ from ..db.models import SensorReading
 # Load environment variables
 load_dotenv()
 
-class MQTTClient:    def __init__(self):
+class MQTTClient:
+    def __init__(self):
         self.broker = os.getenv("MQTT_BROKER", "localhost")
         self.port = int(os.getenv("MQTT_PORT", "1883"))
         self.topic = os.getenv("MQTT_TOPIC", "plant/sensors/#")
