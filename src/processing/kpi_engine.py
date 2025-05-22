@@ -65,11 +65,8 @@ class KPIEngine:
             
             if total_count == 0:
                 return 1.0  # Si no hay datos, asumimos 100% disponibilidad
-            
-            # Calcula la disponibilidad basada en el tiempo de operación
+              # Calcula la disponibilidad basada en el tiempo de operación
             availability = running_count / total_count
-            
-            availability = running_time / total_time
             return min(max(availability, 0.0), 1.0)  # Limita entre 0 y 1
             
         except Exception as e:
