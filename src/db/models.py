@@ -1,6 +1,5 @@
 """Database models for the KPI monitor."""
-from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, Float, String, TIMESTAMP, text
 from datetime import datetime
 
 from .database import Base
@@ -8,29 +7,25 @@ from .database import Base
 class SensorReading(Base):
     __tablename__ = "sensor_readings"
 
-    id = Column(Integer, primary_key=True, index=True)
-    sensor_id = Column(String, index=True)
-    value = Column(Float)
-    timestamp = Column(DateTime, default=datetime.utcnow)
-    unit = Column(String)
+    time = Column(TIMESTAMP(timezone=True), primary_key=True, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+    sensor_id = Column(String, primary_key=True, nullable=False)
+    value = Column(Float, nullable=False)
+    unit = Column(String, nullable=False)
     
 class KPIValue(Base):
     __tablename__ = "kpi_values"
     
-    id = Column(Integer, primary_key=True, index=True)
-    kpi_name = Column(String, index=True)
-    value = Column(Float)
-    timestamp = Column(DateTime, default=datetime.utcnow)
-    status = Column(String)  # 'normal', 'warning', 'critical'
+    time = Column(TIMESTAMP(timezone=True), primary_key=True, nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+    kpi_name = Column(String, primary_key=True, nullable=False)
+    value = Column(Float, nullable=False)
+    status = Column(String, nullable=False)  # 'normal', 'warning', 'critical'
 
 class Alert(Base):
     __tablename__ = "alerts"
     
-    id = Column(Integer, primary_key=True, index=True)
-    kpi_id = Column(Integer, ForeignKey("kpi_values.id"))
-    severity = Column(String)  # 'warning', 'critical'
-    message = Column(String)
-    timestamp = Column(DateTime, default=datetime.utcnow)
-    acknowledged = Column(Integer, default=0)  # 0=no, 1=yes
-    
-    kpi = relationship("KPIValue")
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    time = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('CURRENT_TIMESTAMP'))
+    kpi_name = Column(String, nullable=False)
+    severity = Column(String, nullable=False)  # 'warning', 'critical'
+    message = Column(String, nullable=False)
+    acknowledged = Column(Integer, nullable=False, default=0)  # 0=no, 1=yes

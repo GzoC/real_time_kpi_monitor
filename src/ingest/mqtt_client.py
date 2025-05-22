@@ -12,11 +12,10 @@ from ..db.models import SensorReading
 # Load environment variables
 load_dotenv()
 
-class MQTTClient:
-    def __init__(self):
-        self.broker = os.getenv("MQTT_BROKER")
-        self.port = int(os.getenv("MQTT_PORT"))
-        self.topic = os.getenv("MQTT_TOPIC")
+class MQTTClient:    def __init__(self):
+        self.broker = os.getenv("MQTT_BROKER", "localhost")
+        self.port = int(os.getenv("MQTT_PORT", "1883"))
+        self.topic = os.getenv("MQTT_TOPIC", "plant/sensors/#")
         
         self.client = mqtt.Client()
         self.client.on_connect = self.on_connect
@@ -34,12 +33,11 @@ class MQTTClient:
         """Callback when a message is received from the broker."""
         try:
             payload = json.loads(msg.payload.decode())
-            
-            reading = SensorReading(
+              reading = SensorReading(
+                time=datetime.utcnow(),
                 sensor_id=payload.get("sensor_id"),
                 value=payload.get("value"),
-                unit=payload.get("unit"),
-                timestamp=datetime.utcnow()
+                unit=payload.get("unit")
             )
             
             # Save to database
