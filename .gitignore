@@ -1,9 +1,67 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# C extensions
+# Virtual Environment
+.env
+.venv
+.venv_real_time_kpi_monitor/
+venv/
+ENV/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+
+# Database
+*.sqlite3
+docker/timescaledb/data/
+
+# MQTT
+docker/mosquitto/data/
+docker/mosquitto/log/
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Node modules (for any future frontend)
+node_modules/
+npm-debug.log*
+
+# Jupyter Notebook
+.ipynb_checkpoints
+notebooks/.ipynb_checkpoints/
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
 *.so
 
 # Distribution / packaging
