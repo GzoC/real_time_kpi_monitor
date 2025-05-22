@@ -29,12 +29,11 @@ class MQTTClient:
             client.subscribe(self.topic)
         else:
             logger.error(f"Failed to connect to MQTT Broker with code {rc}")
-            
-    def on_message(self, client, userdata, msg):
+              def on_message(self, client, userdata, msg):
         """Callback when a message is received from the broker."""
         try:
             payload = json.loads(msg.payload.decode())
-              reading = SensorReading(
+            reading = SensorReading(
                 time=datetime.utcnow(),
                 sensor_id=payload.get("sensor_id"),
                 value=payload.get("value"),
