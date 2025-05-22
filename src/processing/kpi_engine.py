@@ -47,21 +47,27 @@ class KPIEngine:
 
     def _calculate_availability(self, start_time: datetime, end_time: datetime) -> float:
         """Calcula el componente de disponibilidad del OEE."""
-        try:
-            # Obtiene las lecturas del sensor de estado de la máquina
-            readings = self.db.query(SensorReading).filter(
+        try:            # Obtiene las lecturas del sensor de estado de la máquina
+            running_count = self.db.query(func.count(SensorReading.time)).filter(
+                and_(
+                    SensorReading.sensor_id == "STATUS001",
+                    SensorReading.time.between(start_time, end_time),
+                    SensorReading.value >= 1
+                )
+            ).scalar() or 0
+            
+            total_count = self.db.query(func.count(SensorReading.time)).filter(
                 and_(
                     SensorReading.sensor_id == "STATUS001",
                     SensorReading.time.between(start_time, end_time)
                 )
-            ).all()
+            ).scalar() or 0
             
-            if not readings:
+            if total_count == 0:
                 return 1.0  # Si no hay datos, asumimos 100% disponibilidad
             
-            # Cuenta el tiempo total y el tiempo de operación
-            total_time = (end_time - start_time).total_seconds()
-            running_time = sum(1 for r in readings if r.value == 1) * 60  # asumiendo lectura cada minuto
+            # Calcula la disponibilidad basada en el tiempo de operación
+            availability = running_count / total_count
             
             availability = running_time / total_time
             return min(max(availability, 0.0), 1.0)  # Limita entre 0 y 1
@@ -72,26 +78,22 @@ class KPIEngine:
 
     def _calculate_performance(self, start_time: datetime, end_time: datetime) -> float:
         """Calcula el componente de rendimiento del OEE."""
-        try:
-            # Obtiene las lecturas del sensor de velocidad
-            readings = self.db.query(SensorReading).filter(
+        try:            # Obtiene la velocidad promedio del sensor
+            avg_speed = self.db.query(func.avg(SensorReading.value)).filter(
                 and_(
                     SensorReading.sensor_id == "SPEED001",
                     SensorReading.time.between(start_time, end_time)
                 )
-            ).all()
+            ).scalar() or 0.0
             
-            if not readings:
+            if avg_speed == 0.0:
                 return 1.0  # Si no hay datos, asumimos 100% rendimiento
             
             # Velocidad ideal de la máquina (unidades/hora)
             ideal_speed = 100.0
             
             # Calcula el rendimiento basado en la velocidad real vs ideal
-            actual_speeds = [r.value for r in readings]
-            avg_speed = sum(actual_speeds) / len(actual_speeds)
-            
-            performance = avg_speed / ideal_speed
+            performance = float(avg_speed) / ideal_speed
             return min(max(performance, 0.0), 1.0)  # Limita entre 0 y 1
             
         except Exception as e:
@@ -100,23 +102,27 @@ class KPIEngine:
 
     def _calculate_quality(self, start_time: datetime, end_time: datetime) -> float:
         """Calcula el componente de calidad del OEE."""
-        try:
-            # Obtiene las lecturas del sensor de calidad
-            readings = self.db.query(SensorReading).filter(
+        try:            # Obtiene el conteo de productos buenos y total
+            good_products = self.db.query(func.count(SensorReading.time)).filter(
+                and_(
+                    SensorReading.sensor_id == "QUALITY001",
+                    SensorReading.time.between(start_time, end_time),
+                    SensorReading.value >= 0.95  # threshold de calidad
+                )
+            ).scalar() or 0
+            
+            total_products = self.db.query(func.count(SensorReading.time)).filter(
                 and_(
                     SensorReading.sensor_id == "QUALITY001",
                     SensorReading.time.between(start_time, end_time)
                 )
-            ).all()
+            ).scalar() or 0
             
-            if not readings:
+            if total_products == 0:
                 return 1.0  # Si no hay datos, asumimos 100% calidad
             
-            # Calcula la tasa de calidad (productos buenos / total productos)
-            total_products = len(readings)
-            good_products = sum(1 for r in readings if r.value >= 0.95)  # threshold de calidad
-            
-            quality = good_products / total_products if total_products > 0 else 1.0
+            # Calcula la tasa de calidad
+            quality = float(good_products) / float(total_products)
             return min(max(quality, 0.0), 1.0)  # Limita entre 0 y 1
             
         except Exception as e:
