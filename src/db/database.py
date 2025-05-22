@@ -18,10 +18,9 @@ DB_NAME = os.getenv("DB_NAME")
 # Create database URL
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-# Create SQLAlchemy engine with encoding settings
+# Create SQLAlchemy engine
 engine = create_engine(
     DATABASE_URL,
-    encoding='utf-8',
     connect_args={'client_encoding': 'utf8'}
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

@@ -19,11 +19,9 @@ DB_NAME = os.getenv("DB_NAME", "kpi_monitor")
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 def init_db():
-    """Initialize the database with TimescaleDB extension and tables."""
-    # Create engine with explicit encoding settings
+    """Initialize the database with TimescaleDB extension and tables."""    # Create engine with explicit encoding settings
     engine = create_engine(
         DATABASE_URL,
-        encoding='utf-8',
         connect_args={'client_encoding': 'utf8'}
     )
     
