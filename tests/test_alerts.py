@@ -11,7 +11,7 @@ def test_create_alert(test_db):
     response = client.post(
         "/alerts/",
         json={
-            "kpi_id": 1,
+            "kpi_name": "OEE",
             "severity": "warning",
             "message": "Test alert"
         }
@@ -20,11 +20,16 @@ def test_create_alert(test_db):
     data = response.json()
     assert data["severity"] == "warning"
     assert data["message"] == "Test alert"
-    
+    assert data["kpi_name"] == "OEE"
+
 def test_get_alerts(test_db):
     """Test getting all alerts."""
     # Create test alert
-    alert = Alert(kpi_id=1, severity="warning", message="Test alert")
+    alert = Alert(
+        kpi_name="OEE",
+        severity="warning",
+        message="Test alert"
+    )
     test_db.add(alert)
     test_db.commit()
     
@@ -33,11 +38,16 @@ def test_get_alerts(test_db):
     data = response.json()
     assert len(data) > 0
     assert data[0]["message"] == "Test alert"
-    
+    assert data[0]["kpi_name"] == "OEE"
+
 def test_acknowledge_alert(test_db):
     """Test acknowledging an alert."""
     # Create test alert
-    alert = Alert(kpi_id=1, severity="warning", message="Test alert")
+    alert = Alert(
+        kpi_name="OEE",
+        severity="warning",
+        message="Test alert"
+    )
     test_db.add(alert)
     test_db.commit()
     
