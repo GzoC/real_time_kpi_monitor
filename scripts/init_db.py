@@ -48,13 +48,12 @@ def init_db():
         print("Database tables created successfully!")
         
         # Create hypertables
-        with engine.connect() as connection:
-            connection.execute(text("""
-                SELECT create_hypertable('sensor_readings', 'timestamp',
+        with engine.connect() as connection:            connection.execute(text("""
+                SELECT create_hypertable('sensor_readings', 'time',
                                        if_not_exists => TRUE);
             """))
             connection.execute(text("""
-                SELECT create_hypertable('kpi_values', 'timestamp',
+                SELECT create_hypertable('kpi_values', 'time',
                                        if_not_exists => TRUE);
             """))
             connection.commit()
