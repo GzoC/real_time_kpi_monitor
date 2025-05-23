@@ -46,8 +46,8 @@ def init_db():
         # Create all tables
         Base.metadata.create_all(bind=engine)
         print("Database tables created successfully!")
-        
-        # Create hypertables        with engine.connect() as connection:
+          # Create hypertables
+        with engine.connect() as connection:
             connection.execute(text("""
                 SELECT create_hypertable('sensor_readings', 'time',
                     if_not_exists => TRUE);
