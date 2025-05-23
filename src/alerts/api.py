@@ -11,16 +11,16 @@ from ..db.models import Alert, KPIValue
 app = FastAPI(title="KPI Monitor Alert Service")
 
 class AlertCreate(BaseModel):
-    kpi_id: int
+    kpi_name: str
     severity: str
     message: str
 
 class AlertResponse(BaseModel):
     id: int
-    kpi_id: int
+    kpi_name: str
     severity: str
     message: str
-    timestamp: datetime
+    time: datetime
     acknowledged: int
 
     class Config:
