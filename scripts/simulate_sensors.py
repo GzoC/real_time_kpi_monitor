@@ -10,12 +10,11 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-def simulate_sensors():
-    """Simula datos de sensores y los publica al broker MQTT."""
-    client = mqtt.Client()
+def simulate_sensors():    """Simula datos de sensores y los publica al broker MQTT."""
+    client = mqtt.Client(protocol=mqtt.MQTTv5)
     
     try:
-        client.connect(os.getenv("MQTT_BROKER"), int(os.getenv("MQTT_PORT")))
+        client.connect(os.getenv("MQTT_BROKER", "localhost"), int(os.getenv("MQTT_PORT", "1883")))
         
         # Estado inicial de la máquina
         machine_running = True
