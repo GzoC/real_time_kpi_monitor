@@ -3,6 +3,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from src.db.models import Base
 import os
+import psycopg2
 from dotenv import load_dotenv
 
 # Load environment variables
