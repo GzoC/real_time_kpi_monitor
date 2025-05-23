@@ -28,4 +28,4 @@ class Alert(Base):
     kpi_name = Column(String, nullable=False)
     severity = Column(String, nullable=False)  # 'warning', 'critical'
     message = Column(String, nullable=False)
-    acknowledged = Column(Integer, nullable=False, default=0)  # 0=no, 1=yes
+    acknowledged = Column(Integer, nullable=False, server_default=text('0'))  # 0=no, 1=yes
