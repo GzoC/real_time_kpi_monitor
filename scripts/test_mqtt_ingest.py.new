@@ -1,0 +1,90 @@
+"""Script para probar la ingestión de datos MQTT."""
+import paho.mqtt.client as mqtt
+import json
+from datetime import datetime
+import os
+from dotenv import load_dotenv
+from sqlalchemy import create_engine, text
+from loguru import logger
+
+# Cargar variables de entorno
+load_dotenv()
+
+# Configuración de base de datos
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5433")
+DB_NAME = os.getenv("DB_NAME", "kpi_monitor")
+
+# Crear URL y engine de base de datos
+DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+engine = create_engine(DATABASE_URL)
+
+def on_connect(client, userdata, flags, rc, properties=None):
+    """Callback cuando el cliente se conecta al broker."""
+    if rc == 0:
+        logger.info("¡Conectado al broker MQTT!")
+        client.subscribe("plant/sensors/#")
+        logger.info("Suscrito al tópico plant/sensors/#")
+    else:
+        logger.error(f"Error de conexión con código {rc}")
+
+def on_message(client, userdata, msg):
+    """Callback cuando se recibe un mensaje."""
+    try:
+        payload = json.loads(msg.payload.decode())
+        logger.debug(f"Recibido: {payload}")
+        
+        # Validar datos requeridos
+        required_fields = ["sensor_id", "value", "unit"]
+        if not all(field in payload for field in required_fields):
+            logger.warning(f"Mensaje incompleto ignorado: {payload}")
+            return
+        
+        # Insertar en la base de datos
+        with engine.connect() as conn:
+            conn.execute(text("""
+                INSERT INTO sensor_readings (time, sensor_id, value, unit)
+                VALUES (NOW(), :sensor_id, :value, :unit)
+            """), {
+                "sensor_id": payload["sensor_id"],
+                "value": float(payload["value"]),
+                "unit": payload["unit"]
+            })
+            conn.commit()
+            
+        logger.info(f"Guardado en BD: {payload['sensor_id']} = {payload['value']} {payload['unit']}")
+        
+    except json.JSONDecodeError as e:
+        logger.error(f"Error decodificando JSON: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error procesando mensaje: {str(e)}")
+
+def main():
+    """Función principal."""
+    # Configurar logging
+    logger.add("logs/mqtt_ingest.log", rotation="500 MB")
+    
+    # Crear cliente MQTT con protocolo v5
+    client = mqtt.Client(protocol=mqtt.MQTTv5)
+    client.on_connect = on_connect
+    client.on_message = on_message
+    
+    broker = os.getenv("MQTT_BROKER", "localhost")
+    port = int(os.getenv("MQTT_PORT", "1883"))
+    
+    try:
+        logger.info(f"Conectando a broker MQTT en {broker}:{port}")
+        client.connect(broker, port)
+        client.loop_forever()
+    except KeyboardInterrupt:
+        logger.info("\nDeteniendo cliente...")
+    except Exception as e:
+        logger.error(f"Error: {str(e)}")
+    finally:
+        client.disconnect()
+        logger.info("Desconectado del broker MQTT")
+
+if __name__ == "__main__":
+    main()
