@@ -36,7 +36,12 @@ def get_db():
 @app.post("/alerts/", response_model=AlertResponse)
 async def create_alert(alert: AlertCreate, db: Session = Depends(get_db)):
     """Create a new alert."""
-    db_alert = Alert(**alert.dict())
+    db_alert = Alert(
+        kpi_name=alert.kpi_name,
+        severity=alert.severity,
+        message=alert.message,
+        time=datetime.utcnow()
+    )
     db.add(db_alert)
     db.commit()
     db.refresh(db_alert)
