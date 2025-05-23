@@ -27,9 +27,9 @@ class MQTTClient:
         if rc == 0:
             logger.info("Connected to MQTT Broker!")
             client.subscribe(self.topic)
-        else:
-            logger.error(f"Failed to connect to MQTT Broker with code {rc}")
-              def on_message(self, client, userdata, msg):
+        else:            logger.error(f"Failed to connect to MQTT Broker with code {rc}")
+            
+    def on_message(self, client, userdata, msg):
         """Callback when a message is received from the broker."""
         try:
             payload = json.loads(msg.payload.decode())
@@ -52,12 +52,17 @@ class MQTTClient:
             logger.error(f"Error processing message: {str(e)}")
             
     def start(self):
-        """Start the MQTT client."""
+        """Start the MQTT client and connect to broker."""
         try:
+            logger.info(f"Connecting to MQTT broker at {self.broker}:{self.port}")
             self.client.connect(self.broker, self.port)
             self.client.loop_forever()
+        except KeyboardInterrupt:
+            logger.info("Stopping MQTT client...")
+            self.client.disconnect()
         except Exception as e:
-            logger.error(f"Error starting MQTT client: {str(e)}")
+            logger.error(f"Error in MQTT client: {str(e)}")
+            raise
 
 if __name__ == "__main__":
     client = MQTTClient()
