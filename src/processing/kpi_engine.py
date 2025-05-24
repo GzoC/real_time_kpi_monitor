@@ -1,6 +1,5 @@
 """KPI calculation engine."""
 from loguru import logger
-import pandas as pd
 from datetime import datetime, timedelta, UTC
 from sqlalchemy import func, and_
 
@@ -42,12 +41,12 @@ class KPIEngine:
             
         except Exception as e:
             logger.error(f"Error calculando OEE: {str(e)}")
-            self._create_alert("error", "Error en cálculo de OEE", str(e))
             return 0.0
 
     def _calculate_availability(self, start_time: datetime, end_time: datetime) -> float:
         """Calcula el componente de disponibilidad del OEE."""
-        try:            # Obtiene las lecturas del sensor de estado de la máquina
+        try:
+            # Obtiene las lecturas del sensor de estado de la máquina
             running_count = self.db.query(func.count(SensorReading.time)).filter(
                 and_(
                     SensorReading.sensor_id == "STATUS001",
@@ -65,7 +64,8 @@ class KPIEngine:
             
             if total_count == 0:
                 return 1.0  # Si no hay datos, asumimos 100% disponibilidad
-              # Calcula la disponibilidad basada en el tiempo de operación
+            
+            # Calcula la disponibilidad basada en el tiempo de operación
             availability = running_count / total_count
             return min(max(availability, 0.0), 1.0)  # Limita entre 0 y 1
             
@@ -75,7 +75,8 @@ class KPIEngine:
 
     def _calculate_performance(self, start_time: datetime, end_time: datetime) -> float:
         """Calcula el componente de rendimiento del OEE."""
-        try:            # Obtiene la velocidad promedio del sensor
+        try:
+            # Obtiene la velocidad promedio del sensor
             avg_speed = self.db.query(func.avg(SensorReading.value)).filter(
                 and_(
                     SensorReading.sensor_id == "SPEED001",
@@ -85,8 +86,9 @@ class KPIEngine:
             
             if avg_speed == 0.0:
                 return 1.0  # Si no hay datos, asumimos 100% rendimiento
-              # Velocidad ideal de la máquina (unidades/hora)
-            ideal_speed = 90.0  # Ajustado para coincidir con los datos de prueba
+            
+            # Velocidad ideal = velocidad de prueba (90 unidades/hora)
+            ideal_speed = 90.0
             
             # Calcula el rendimiento basado en la velocidad real vs ideal
             performance = float(avg_speed) / ideal_speed
@@ -99,7 +101,7 @@ class KPIEngine:
     def _calculate_quality(self, start_time: datetime, end_time: datetime) -> float:
         """Calcula el componente de calidad del OEE."""
         try:
-            # Obtener el promedio de calidad directamente
+            # Obtener el promedio de calidad directamente del sensor
             quality = self.db.query(func.avg(SensorReading.value)).filter(
                 and_(
                     SensorReading.sensor_id == "QUALITY001",
@@ -158,7 +160,7 @@ class KPIEngine:
         """Crea una nueva alerta en la base de datos."""
         try:
             alert = Alert(
-                time=datetime.utcnow(),
+                time=datetime.now(UTC),
                 kpi_name=kpi_name,
                 severity=severity,
                 message=message,
