@@ -58,19 +58,15 @@ async def get_alerts(skip: int = 0, limit: int = 100, db: Session = Depends(get_
 async def acknowledge_alert(alert_id: int, db: Session = Depends(get_db)):
     """Acknowledge an alert."""
     try:
-        # Obtener la alerta existente con bloqueo
-        alert = db.query(Alert).filter(Alert.id == alert_id).with_for_update().first()
+        # Actualizar usando SQL nativo para garantizar la actualización
+        db.execute(text("UPDATE alerts SET acknowledged = 1 WHERE id = :alert_id"), {"alert_id": alert_id})
+        db.commit()
+        
+        # Verificar que la alerta existe y fue actualizada
+        alert = db.query(Alert).filter(Alert.id == alert_id).first()
         if not alert:
             raise HTTPException(status_code=404, detail="Alert not found")
-
-        # Actualizar usando set_attribute desde SQLAlchemy
-        from sqlalchemy import orm
-        orm.attributes.set_attribute(alert, 'acknowledged', 1)
-        
-        # Commitar la transacción
-        db.commit()
-        db.refresh(alert)
-        
+            
         return {"message": "Alert acknowledged", "alert_id": alert_id}
         
     except Exception as e:
