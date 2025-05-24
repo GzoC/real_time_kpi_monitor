@@ -58,21 +58,23 @@ async def get_alerts(skip: int = 0, limit: int = 100, db: Session = Depends(get_
 async def acknowledge_alert(alert_id: int, db: Session = Depends(get_db)):
     """Acknowledge an alert."""
     try:
-        # Usar update directamente con SQLAlchemy
-        stmt = update(Alert).where(Alert.id == alert_id).values(acknowledged=1)
-        result = db.execute(stmt)
-        
-        if result.rowcount == 0:
+        # Obtener y actualizar la alerta de forma atómica
+        alert = db.query(Alert).filter(Alert.id == alert_id).first()
+        if not alert:
             raise HTTPException(status_code=404, detail="Alert not found")
-            
+        
+        # Actualizar usando setattr para evitar problemas con Column
+        setattr(alert, 'acknowledged', 1)
+        
         # Commitar la transacción
         db.commit()
+        db.refresh(alert)
         
         return {"message": "Alert acknowledged", "alert_id": alert_id}
         
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail="Error acknowledging alert")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
