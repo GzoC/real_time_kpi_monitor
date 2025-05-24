@@ -3,8 +3,8 @@ from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List
-from pydantic import BaseModel
-from datetime import datetime
+from pydantic import BaseModel, ConfigDict
+from datetime import datetime, UTC
 
 from ..db.database import SessionLocal
 from ..db.models import Alert, KPIValue
@@ -17,15 +17,14 @@ class AlertCreate(BaseModel):
     message: str
 
 class AlertResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int
     kpi_name: str
     severity: str
     message: str
     time: datetime
     acknowledged: int
-
-    class Config:
-        from_attributes = True
 
 def get_db():
     db = SessionLocal()
@@ -41,7 +40,7 @@ async def create_alert(alert: AlertCreate, db: Session = Depends(get_db)):
         kpi_name=alert.kpi_name,
         severity=alert.severity,
         message=alert.message,
-        time=datetime.utcnow()
+        time=datetime.now(UTC)
     )
     db.add(db_alert)
     db.commit()
@@ -61,12 +60,13 @@ async def acknowledge_alert(alert_id: int, db: Session = Depends(get_db)):
     if not alert:
         raise HTTPException(status_code=404, detail="Alert not found")
     
-    # Actualizar usando una sentencia SQL directa
+    # Usar SQL directo para actualizar el estado
     db.execute(
         text("UPDATE alerts SET acknowledged = 1 WHERE id = :id"),
         {"id": alert_id}
     )
     db.commit()
+    
     return {"message": "Alert acknowledged"}
 
 if __name__ == "__main__":

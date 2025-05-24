@@ -1,13 +1,13 @@
 """Test KPI calculation engine."""
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from src.processing.kpi_engine import KPIEngine
 from src.db.models import SensorReading, KPIValue
 
 def test_oee_calculation(test_db):
     """Test OEE calculation."""
     # Create test data
-    end_time = datetime.utcnow()
+    end_time = datetime.now(UTC)
     start_time = end_time - timedelta(hours=1)
     
     # Crear lecturas de prueba para el periodo
