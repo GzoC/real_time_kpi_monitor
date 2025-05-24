@@ -76,11 +76,21 @@ class KPIEngine:
     def _calculate_performance(self, start_time: datetime, end_time: datetime) -> float:
         """Calcula el componente de rendimiento del OEE."""
         try:
-            # Obtiene la velocidad promedio del sensor
+            # Obtiene la velocidad promedio del sensor cuando la máquina está en funcionamiento
             avg_speed = self.db.query(func.avg(SensorReading.value)).filter(
                 and_(
                     SensorReading.sensor_id == "SPEED001",
-                    SensorReading.time.between(start_time, end_time)
+                    SensorReading.time.between(start_time, end_time),
+                    # Solo considerar velocidad cuando la máquina está funcionando
+                    SensorReading.time.in_(
+                        self.db.query(SensorReading.time).filter(
+                            and_(
+                                SensorReading.sensor_id == "STATUS001",
+                                SensorReading.value >= 1,
+                                SensorReading.time.between(start_time, end_time)
+                            )
+                        )
+                    )
                 )
             ).scalar() or 0.0
             
