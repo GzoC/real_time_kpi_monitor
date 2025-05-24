@@ -57,17 +57,25 @@ async def get_alerts(skip: int = 0, limit: int = 100, db: Session = Depends(get_
 @app.put("/alerts/{alert_id}/acknowledge")
 async def acknowledge_alert(alert_id: int, db: Session = Depends(get_db)):
     """Acknowledge an alert."""
-    # Query para actualizar
-    result = db.query(Alert).filter(Alert.id == alert_id).update(
-        {"acknowledged": 1},
-        synchronize_session="fetch"
-    )
-    
-    if result == 0:
-        raise HTTPException(status_code=404, detail="Alert not found")
-    
-    db.commit()
-    return {"message": "Alert acknowledged"}
+    try:
+        # Obtener la alerta primero para asegurar que existe
+        alert = db.query(Alert).filter(Alert.id == alert_id).first()
+        if not alert:
+            raise HTTPException(status_code=404, detail="Alert not found")
+            
+        # Actualizar el campo acknowledged
+        alert.acknowledged = 1
+        
+        # Commitar la transacción
+        db.commit()
+        db.refresh(alert)
+        
+        return {"message": "Alert acknowledged", "alert_id": alert_id}
+        
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error acknowledging alert {alert_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
