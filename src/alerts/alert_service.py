@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text, update
 from typing import List
 from pydantic import BaseModel, ConfigDict
-from datetime import datetime, UTC
+from datetime import datetime, timezone # Changed UTC import
 
 from ..db.database import SessionLocal
 from ..db.models import Alert, KPIValue
@@ -40,7 +40,7 @@ async def create_alert(alert: AlertCreate, db: Session = Depends(get_db)):
         kpi_name=alert.kpi_name,
         severity=alert.severity,
         message=alert.message,
-        time=datetime.now(UTC),
+        time=datetime.now(timezone.utc), # Changed UTC to timezone.utc
         acknowledged=0
     )
     db.add(db_alert)
@@ -58,20 +58,24 @@ async def get_alerts(skip: int = 0, limit: int = 100, db: Session = Depends(get_
 async def acknowledge_alert(alert_id: int, db: Session = Depends(get_db)):
     """Acknowledge an alert."""
     try:
-        # Actualizar usando SQL nativo para garantizar la actualización
-        db.execute(text("UPDATE alerts SET acknowledged = 1 WHERE id = :alert_id"), {"alert_id": alert_id})
-        db.commit()
-        
-        # Verificar que la alerta existe y fue actualizada
+        # Use ORM to update the alert
         alert = db.query(Alert).filter(Alert.id == alert_id).first()
         if not alert:
             raise HTTPException(status_code=404, detail="Alert not found")
-            
-        return {"message": "Alert acknowledged", "alert_id": alert_id}
         
+        alert.acknowledged = 1
+        db.add(alert) # Add to session before commit, though for update it might not be strictly needed if already persistent
+        db.commit()
+        db.refresh(alert) # Refresh to get the updated state from DB
+            
+        return {"message": "Alert acknowledged", "alert_id": alert_id, "acknowledged_status": alert.acknowledged}
+        
+    except HTTPException: # Re-raise HTTPException instances directly
+        raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
+        # Log the error for debugging: logger.error(f"Unhandled error in acknowledge_alert: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
