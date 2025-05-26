@@ -1,6 +1,6 @@
 """KPI calculation engine."""
 from loguru import logger
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta, timezone # Changed UTC import
 from sqlalchemy import func, and_
 
 from ..db.database import SessionLocal
@@ -174,7 +174,7 @@ class KPIEngine:
         """Crea una nueva alerta en la base de datos."""
         try:
             alert = Alert(
-                time=datetime.now(UTC),
+                time=datetime.now(timezone.utc), # Changed UTC to timezone.utc
                 kpi_name=kpi_name,
                 severity=severity,
                 message=message,

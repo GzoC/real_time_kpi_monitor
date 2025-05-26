@@ -1,0 +1,15 @@
+{"sensor_id": "STATUS001", "value": 1, "unit": "binary", "timestamp": "2025-05-25T22:44:20.118111"}
+{"sensor_id": "SPEED001", "value": 81.52, "unit": "units/hour", "timestamp": "2025-05-25T22:44:20.118111"}
+{"sensor_id": "QUALITY001", "value": 0.956, "unit": "ratio", "timestamp": "2025-05-25T22:44:20.118111"}
+{"sensor_id": "STATUS001", "value": 1, "unit": "binary", "timestamp": "2025-05-25T22:44:21.119502"}
+{"sensor_id": "SPEED001", "value": 74.78, "unit": "units/hour", "timestamp": "2025-05-25T22:44:21.119502"}
+{"sensor_id": "QUALITY001", "value": 0.983, "unit": "ratio", "timestamp": "2025-05-25T22:44:21.119502"}
+{"sensor_id": "STATUS001", "value": 1, "unit": "binary", "timestamp": "2025-05-25T22:44:22.121356"}
+{"sensor_id": "SPEED001", "value": 74.2, "unit": "units/hour", "timestamp": "2025-05-25T22:44:22.121356"}
+{"sensor_id": "QUALITY001", "value": 0.965, "unit": "ratio", "timestamp": "2025-05-25T22:44:22.121356"}
+{"sensor_id": "STATUS001", "value": 1, "unit": "binary", "timestamp": "2025-05-25T22:44:23.124150"}
+{"sensor_id": "SPEED001", "value": 86.07, "unit": "units/hour", "timestamp": "2025-05-25T22:44:23.124150"}
+{"sensor_id": "QUALITY001", "value": 0.985, "unit": "ratio", "timestamp": "2025-05-25T22:44:23.124150"}
+{"sensor_id": "STATUS001", "value": 1, "unit": "binary", "timestamp": "2025-05-25T22:44:24.130565"}
+{"sensor_id": "SPEED001", "value": 78.14, "unit": "units/hour", "timestamp": "2025-05-25T22:44:24.130565"}
+{"sensor_id": "QUALITY001", "value": 0.952, "unit": "ratio", "timestamp": "2025-05-25T22:44:24.130565"}
