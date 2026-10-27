@@ -22,8 +22,8 @@ jobs:
           version: '0.11.19'
           python-version: ${{ matrix.python }}
       - run: uv sync --locked --extra dev
-      - run: uv run --no-sync ruff check src tests
-      - run: uv run --no-sync ruff format --check src tests
+      - run: uv run --no-sync ruff check src tests scripts
+      - run: uv run --no-sync ruff format --check src tests scripts
       - run: uv run --no-sync pytest --cov=kpi_monitor --cov-report=term-missing
       - run: uv build
       - name: Install and exercise wheel outside source tree

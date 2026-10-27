@@ -71,13 +71,16 @@ def eventually(predicate, timeout=8):
     pytest.fail("MQTT observable state did not converge before timeout")
 
 
-def test_real_broker_replay_reconnect_and_rejections(broker, tmp_path):
+def test_real_broker_replay_reconnect_and_rejections(broker, tmp_path, monkeypatch):
+    readiness = tmp_path / "consumer.ready"
+    monkeypatch.setenv("MQTT_READY_FILE", str(readiness))
     store = Store(tmp_path / "mqtt.db")
     shift, events = scenario("reference")
     consumer = MQTTIngestor(store, broker)
     consumer.start()
     try:
         assert consumer.ready.wait(8)
+        assert readiness.read_text() == "ready"
         assert publish_scenario(broker, shift, events, delay=0) == 50
         eventually(lambda: len(store.events(shift)) == 50)
         assert calculate_oee(store.shift(shift.shift_id), store.events(shift)).oee == pytest.approx(
@@ -85,6 +88,7 @@ def test_real_broker_replay_reconnect_and_rejections(broker, tmp_path):
         )
         # New network connection, same persistent client identity and durable DB.
         consumer.stop()
+        assert readiness.read_text() == "not_ready"
         consumer = MQTTIngestor(store, broker)
         consumer.start()
         assert consumer.ready.wait(8)
