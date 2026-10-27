@@ -1,29 +1,19 @@
 .git
-.vscode
-__pycache__
-*.pyc
-.env
-*.db
-airflow/logs/*
-*.log
+.venv
+venv
+**/__pycache__
+*.egg-info
 .pytest_cache
-.mypy_cache
-build/
-dist/
-*.egg-info/
-# Add .idea for JetBrains IDEs
-.idea/
-# Add venv or other virtual environment folders
-venv/
-.venv/
-env/
-.env/
-# Docker specific
-Dockerfile
-docker-compose.yml
-# Test reports
-htmlcov/
-.coverage
-# OS specific
-.DS_Store
-Thumbs.db
+.ruff_cache
+.coverage*
+dist
+build
+var
+**/*.db*
+**/*.log
+.env
+.env.*
+node_modules
+test-results
+playwright-report
+docs/evidence

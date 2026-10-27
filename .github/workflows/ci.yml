@@ -1,0 +1,60 @@
+name: Quality and reproducibility
+on:
+  push:
+    branches: [main, 'codex/**']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.11.19'
+          python-version: ${{ matrix.python }}
+      - run: uv sync --locked --extra dev
+      - run: uv run --no-sync ruff check src tests scripts
+      - run: uv run --no-sync ruff format --check src tests scripts
+      - run: uv run --no-sync pytest --cov=kpi_monitor --cov-report=term-missing
+      - run: uv build
+      - name: Install and exercise wheel outside source tree
+        shell: bash
+        run: |
+          uv venv /tmp/kpi-wheel
+          uv pip install --python /tmp/kpi-wheel/bin/python --require-hashes -r requirements.txt
+          uv pip install --python /tmp/kpi-wheel/bin/python --no-deps dist/*.whl
+          cd /tmp
+          /tmp/kpi-wheel/bin/kpi-monitor --db wheel.db seed reference
+          /tmp/kpi-wheel/bin/kpi-monitor --db wheel.db report reference
+      - uses: actions/upload-artifact@v4
+        if: matrix.python == '3.13'
+        with:
+          name: python-distributions
+          path: dist/*
+
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose config --quiet
+      - run: docker compose --profile mqtt up -d --build --wait
+      - name: HTTP dashboard and MQTT smoke
+        run: |
+          curl --fail http://127.0.0.1:8000/ | grep 'Industrial KPI Monitor'
+          docker compose run --rm --no-deps consumer mqtt-replay healthy --delay 0
+          python scripts/container_smoke.py
+      - name: Container logs
+        if: always()
+        run: docker compose --profile mqtt logs --no-color
+      - name: Clean up CI volumes
+        if: always()
+        run: docker compose --profile mqtt down --volumes

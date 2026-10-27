@@ -1,1 +1,0 @@
-"""Alert service package."""
