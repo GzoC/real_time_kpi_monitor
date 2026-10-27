@@ -101,7 +101,7 @@ uv run --no-sync pytest --cov=kpi_monitor --cov-report=term-missing
 uv build
 ```
 
-Las pruebas MQTT levantan un broker aMQTT en un puerto efímero de loopback. No necesitan Docker ni un broker externo. La CI verifica Python 3.11 y 3.13, construye el paquete y ejecuta una prueba Compose → MQTT → SQLite → API. El [informe de validación](docs/VALIDATION.md) separa lo ejecutado localmente de lo pendiente en CI.
+Las pruebas MQTT levantan un broker aMQTT en un puerto efímero de loopback. No necesitan Docker ni un broker externo. La CI verifica Python 3.11 y 3.13, construye el paquete y ejecuta una prueba Compose → MQTT → SQLite → API. El [informe de validación](docs/VALIDATION.md) detalla las comprobaciones locales y las ejecutadas en CI.
 
 Exportar un fixture, reimportarlo y comprobar el resultado:
 
