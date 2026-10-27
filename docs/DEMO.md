@@ -1,5 +1,7 @@
 # Recorrido para revisión técnica (2 minutos)
 
+[Vista rápida: video de la aplicación ejecutada](evidence/walkthrough.mp4).
+
 1. Ejecutar `uv run --no-sync kpi-monitor demo` y abrir `127.0.0.1:8000`.
 2. Revisar el turno con parada: OEE **68,4 %**, A **80 %**, P **90 %**, Q **95 %**. Ver el descanso 08:30–08:40 separado de la parada 08:20–08:30.
 3. Cambiar a **Pérdida de telemetría**: cobertura **80 %**, OEE desconocido. No se rellena el hueco con ceros ni con 100 %.

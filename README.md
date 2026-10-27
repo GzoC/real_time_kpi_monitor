@@ -10,6 +10,8 @@ Un monitor que distingue una máquina detenida de una señal ausente. Calcula di
 
 ![Dashboard con el turno de referencia: OEE 68,4 %, disponibilidad 80 %, rendimiento 90 % y calidad 95 %.](docs/evidence/dashboard-desktop.png)
 
+[Ver la demostración en video (15 s)](docs/evidence/walkthrough.mp4) · [Resultados de validación](docs/VALIDATION.md)
+
 ## Verlo funcionando
 
 Con Python 3.11–3.14 y [uv](https://docs.astral.sh/uv/getting-started/installation/):
