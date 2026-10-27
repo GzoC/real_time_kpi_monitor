@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Monitor de OEE con trazabilidad, cobertura de telemetría y escenarios industriales reproducibles.">
+  <title>Industrial KPI Monitor · Producción</title>
+  <link rel="icon" href="/static/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<aside class="sidebar" aria-label="Información del proyecto">
+  <a class="brand" href="/" aria-label="Industrial KPI Monitor, inicio"><img src="/static/mark.svg" alt="" width="38" height="38"><span>KPI<span class="brand-light"> MONITOR</span><small>INDUSTRIAL ANALYTICS</small></span></a>
+  <div class="nav-label">ESPACIO DE TRABAJO</div>
+  <a class="nav-current" href="#main"><span aria-hidden="true">▦</span> Producción <span class="nav-count">01</span></a>
+  <a class="nav-link" href="#traceability"><span aria-hidden="true">≡</span> Trazabilidad</a>
+  <a class="nav-link" href="/docs" target="_blank" rel="noopener"><span aria-hidden="true">↗</span> Documentación API</a>
+  <div class="sidebar-note"><span class="small-dot"></span> Ingeniería verificable<p>Del evento al indicador.<br>Cada cifra tiene un origen.</p><span class="version">v1.0 · Python / MQTT / SQLite</span></div>
+</aside>
+<div class="workspace">
+  <header class="topbar"><span>Operaciones <span class="slash">/</span> <strong>Monitor de producción</strong></span><span id="connection" class="connection">Conectando…</span></header>
+  <main id="main" tabindex="-1">
+    <section class="heading"><div><p class="eyebrow">EFICIENCIA OPERACIONAL</p><h1>El turno, en perspectiva.</h1><p class="subtitle">Disponibilidad, rendimiento y calidad con cobertura explícita.</p></div><button id="export" class="button secondary" disabled>↓ Exportar reporte</button></section>
+    <div id="error" class="error" role="alert" hidden><strong>No se pudo actualizar.</strong><span id="error-detail"></span><button id="retry" class="button">Reintentar</button></div>
+    <section class="controls" aria-label="Selección de datos">
+      <div class="field"><label for="shift">Turno / activo</label><select id="shift" disabled><option>Cargando turnos…</option></select></div>
+      <div id="demo-control" class="field demo-field" hidden><label for="scenario">Escenario de demostración</label><select id="scenario"><option value="">Seleccionar escenario</option></select></div>
+      <div class="scope"><span class="scope-label">ALCANCE DEL CÁLCULO</span><strong>Turno completo · UTC</strong><small>Actualización automática cada 5 s</small></div>
+    </section>
+    <div id="empty" class="empty" hidden><h2>Aún no hay turnos registrados</h2><p>Importa un turno mediante la CLI o la API. La telemetría aparecerá al recibir intervalos válidos.</p><a href="/docs">Abrir contrato de la API ↗</a></div>
+    <div id="loading" class="loading" role="status">Cargando datos del turno…</div>
+    <div id="dashboard" hidden>
+      <div class="context"><span id="source" class="tag">Datos sintéticos</span><span id="period"></span><span id="machine" class="mono"></span></div>
+      <section class="metrics" aria-label="Indicadores de producción">
+        <article class="metric primary"><div class="metric-heading">OEE <span>Eficiencia global</span></div><div class="metric-value" id="oee">—</div><div id="oee-status" class="metric-caption">Esperando datos</div><div class="metric-rule"></div><p>A × P × Q <span>Sin extrapolación</span></p></article>
+        <article class="metric"><div class="metric-heading"><span class="factor">A</span> Disponibilidad</div><div class="metric-value" id="availability">—</div><p class="metric-caption" id="availability-detail"></p><div class="meter"><i id="availability-meter"></i></div><p class="formula">Tiempo en marcha / planificado</p></article>
+        <article class="metric"><div class="metric-heading"><span class="factor">P</span> Rendimiento</div><div class="metric-value" id="performance">—</div><p class="metric-caption" id="performance-detail"></p><div class="meter"><i id="performance-meter"></i></div><p class="formula">Ciclo ideal × piezas / marcha</p></article>
+        <article class="metric"><div class="metric-heading"><span class="factor">Q</span> Calidad</div><div class="metric-value" id="quality">—</div><p class="metric-caption" id="quality-detail"></p><div class="meter"><i id="quality-meter"></i></div><p class="formula">Piezas buenas / piezas totales</p></article>
+      </section>
+      <section class="coverage-strip" aria-label="Calidad de los datos"><div><span id="coverage-dot" class="small-dot"></span><strong id="coverage-title"></strong><p id="coverage-description"></p></div><div class="freshness"><span>ÚLTIMO INTERVALO</span><strong id="latest"></strong><small id="freshness"></small></div></section>
+      <div class="two-column">
+        <section class="panel trend"><div class="panel-heading"><div><p class="eyebrow">EVOLUCIÓN</p><h2>OEE por período</h2></div><span class="tag neutral">Ventanas de 10 min</span></div><p class="panel-description">Períodos independientes. Una interrupción de datos se muestra como desconocida.</p><div id="chart" class="chart"></div><div class="legend"><span><i class="key valid"></i> OEE calculado</span><span><i class="key missing"></i> Sin cobertura completa</span><span><i class="key pause"></i> Descanso planificado</span></div></section>
+        <section class="panel"><div class="panel-heading"><div><p class="eyebrow">BALANCE DEL TURNO</p><h2>Tiempo y producción</h2></div></div><dl class="balance"><div><dt>Tiempo planificado</dt><dd id="planned"></dd></div><div><dt><i class="key valid"></i> En marcha</dt><dd id="running"></dd></div><div><dt><i class="key stopped"></i> Parada observada</dt><dd id="stopped"></dd></div><div><dt><i class="key missing"></i> Sin telemetría</dt><dd id="missing"></dd></div></dl><div class="production-counts"><div><span id="good"></span><small>Piezas buenas</small></div><div><span id="rejects"></span><small>Rechazadas</small></div><div><span id="total"></span><small>Total observado</small></div></div></section>
+      </div>
+      <section class="panel alerts-panel" aria-labelledby="alerts-heading"><div class="panel-heading"><div><p class="eyebrow">ATENCIÓN OPERACIONAL</p><h2 id="alerts-heading">Alertas del turno <span id="alert-count" class="count"></span></h2></div><small>Umbral de demostración: OEE &lt; 85 %</small></div><div id="alerts"></div><p class="muted" id="rejected"></p></section>
+      <section class="panel" id="traceability"><div class="panel-heading"><div><p class="eyebrow">TRAZABILIDAD</p><h2>Intervalos de producción</h2></div><span id="event-count" class="tag neutral"></span></div><p class="panel-description">Conteos por intervalo, no acumulados. Horas en UTC. Se muestran hasta los últimos 120 registros.</p><div class="table-scroll"><table><caption class="sr-only">Eventos persistidos usados para calcular los indicadores</caption><thead><tr><th scope="col">Inicio</th><th scope="col">Fin</th><th scope="col">Estado</th><th scope="col">Total</th><th scope="col">Buenas</th><th scope="col">ID de evento</th></tr></thead><tbody id="events"></tbody></table></div></section>
+    </div>
+    <footer><span>Industrial KPI Monitor · Caso de ingeniería de <a href="https://github.com/GzoC/real_time_kpi_monitor" target="_blank" rel="noopener">GzoC ↗</a></span><span id="updated">Validando datos…</span></footer>
+    <p id="announcement" class="sr-only" aria-live="polite"></p>
+  </main>
+</div>
+<noscript><p class="error">Activa JavaScript para el dashboard. Los reportes JSON siguen disponibles en la API.</p></noscript>
+</body></html>

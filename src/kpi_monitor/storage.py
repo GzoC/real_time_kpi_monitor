@@ -69,11 +69,13 @@ class Store:
             db.execute("INSERT INTO shifts VALUES (?, ?)", (shift.shift_id, payload))
             return True
 
-    def shifts(self) -> list[Shift]:
+    def shifts(self, limit: int = 100) -> list[Shift]:
         with self.connection() as db:
             return [
                 Shift.model_validate_json(row["payload"])
-                for row in db.execute("SELECT payload FROM shifts ORDER BY shift_id")
+                for row in db.execute(
+                    "SELECT payload FROM shifts ORDER BY rowid DESC LIMIT ?", (limit,)
+                )
             ]
 
     def shift(self, shift_id: str) -> Shift:
@@ -117,10 +119,13 @@ class Store:
         with self.connection() as db:
             rows = db.execute(
                 "SELECT payload FROM events WHERE machine_id=? AND start<? AND end>? "
-                "ORDER BY start",
+                "ORDER BY start LIMIT 50001",
                 (shift.machine_id, shift.end.isoformat(), shift.start.isoformat()),
             )
-            return [ProductionEvent.model_validate_json(row["payload"]) for row in rows]
+            result = [ProductionEvent.model_validate_json(row["payload"]) for row in rows]
+            if len(result) > 50000:
+                raise ValueError("report exceeds the 50000-interval local limit")
+            return result
 
     def record_rejection(self, reason: str):
         with self.connection() as db:

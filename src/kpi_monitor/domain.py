@@ -41,11 +41,13 @@ class Shift(Interval):
     machine_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,80}$")
     name: str = Field(min_length=1, max_length=120)
     ideal_cycle_seconds: float = Field(gt=0, le=86400)
-    breaks: tuple[Interval, ...] = ()
-    source: Literal["synthetic", "external"] = "synthetic"
+    breaks: tuple[Interval, ...] = Field(default=(), max_length=128)
+    source: Literal["synthetic", "external"] = "external"
 
     @model_validator(mode="after")
     def valid_breaks(self):
+        if self.seconds > 86400:
+            raise ValueError("shift must not exceed 24 hours")
         previous = self.start
         for pause in sorted(self.breaks, key=lambda x: x.start):
             if pause.start < previous or pause.start < self.start or pause.end > self.end:
@@ -72,8 +74,8 @@ class ProductionEvent(Interval):
     event_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,120}$")
     machine_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,80}$")
     state: Literal["running", "stopped"]
-    total_count: int = Field(ge=0, strict=True)
-    good_count: int = Field(ge=0, strict=True)
+    total_count: int = Field(ge=0, le=2147483647, strict=True)
+    good_count: int = Field(ge=0, le=2147483647, strict=True)
 
     @model_validator(mode="after")
     def valid_counts(self):
